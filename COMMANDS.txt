@@ -1,0 +1,62 @@
+========================================================
+ HYBRID RAG - Commands to run hybrid_rag.py
+ (Run in PowerShell, inside the hybrid-rag folder)
+========================================================
+
+STEP 1: Create a virtual environment  [only once]
+   python -m venv venv
+
+STEP 2: Activate it
+   .\venv\Scripts\Activate.ps1
+   (If PowerShell blocks scripts, run once:  Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+    CMD users:  venv\Scripts\activate.bat)
+
+STEP 3: Install requirements  [only once]
+   python -m pip install --upgrade pip
+   pip install -r requirements.txt
+
+STEP 4: Add YOUR Groq API key
+   Open the .env file and replace  your_groq_api_key_here  with your own key
+   (free key: https://console.groq.com -> API Keys)
+
+STEP 5: Add your documents
+   Put .pdf, .txt or .md files in the data/ folder (14 sample files are included).
+
+STEP 6: Start the backend
+   uvicorn hybrid_rag:app --reload
+   (or:  python hybrid_rag.py)
+
+STEP 7: Open the API page
+   http://localhost:8000/docs
+
+STEP 8: Use the API (open http://localhost:8000/docs, click an endpoint, click "Try it out", then "Execute")
+
+   GET  /health    nothing to enter. Shows the indexed chunk count and the files in data/.
+
+   POST /upload    click "Choose File" and pick a .pdf, .txt or .md file from your computer.
+                   Response: {"saved": "yourfile.pdf"}
+                   The file is only saved. It is NOT searchable until you run /ingest.
+
+   POST /ingest    nothing to enter. Rebuilds the index from everything in data/.
+                   Run it first, and again after every upload. Response: {"indexed_chunks": 438}
+
+   POST /ask       replace the default body with:
+                   {
+                     "question": "What does BM25 stand for?",
+                     "mode": "hybrid",
+                     "top_k": 5
+                   }
+                   question = your question in plain text
+                   mode     = hybrid (default) | dense | bm25
+                   top_k    = how many chunks are sent to the LLM (5 is fine)
+                   Response: "answer" plus the "sources" it was built from.
+
+   Suggested test order:
+   1. POST /ingest, then GET /health shows the chunk count (index is ready)
+   2. POST /ask with the same question in hybrid, then bm25, then dense, and compare the sources
+   3. POST /upload your own file, POST /ingest, then POST /ask a question about that file
+   4. Ask something not in the documents (e.g. "Who won the 2022 World Cup?"). It should say it doesn't know.
+
+   Same from PowerShell (instead of the /docs page):
+   curl.exe -X POST http://localhost:8000/ingest
+   curl.exe -X POST http://localhost:8000/ask -H "Content-Type: application/json" -d "{\"question\": \"What does BM25 stand for?\", \"mode\": \"hybrid\"}"
