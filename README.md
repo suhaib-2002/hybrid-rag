@@ -20,9 +20,10 @@ RRF score of a chunk = sum of `1 / (60 + rank)` over both rankings.
 ## Project files
 ```
 hybrid_rag.py       the whole backend (indexing, retrieval, generation, FastAPI)
+start.bat           double-click to create the venv, install packages and start the server
 requirements.txt    dependencies
 COMMANDS.txt        step-by-step run commands
-.env                your Groq API key and model settings
+.env                Groq API key and model settings
 data/               documents to search (14 sample Wikipedia files included)
 ```
 
@@ -31,10 +32,10 @@ data/               documents to search (14 sample Wikipedia files included)
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-# put your own Groq key in .env  (GROQ_API_KEY=...)
+# put your Groq key in .env  (GROQ_API_KEY=...)
 uvicorn hybrid_rag:app --reload
 ```
-Open http://localhost:8000/docs, run `POST /ingest`, then `POST /ask`. Full commands are in [COMMANDS.txt](COMMANDS.txt).
+On Windows you can also just double-click `start.bat`. Then open http://localhost:8000/docs. Full commands are in [COMMANDS.txt](COMMANDS.txt).
 
 ## How to use the API
 Open http://localhost:8000/docs, click an endpoint, then **Try it out** and **Execute**.
@@ -53,8 +54,8 @@ Open http://localhost:8000/docs, click an endpoint, then **Try it out** and **Ex
 
 **Suggested test order:** `/ingest`, then `/ask` the same question in each mode and compare the sources, then `/upload` your own file, `/ingest`, and `/ask` about it. Ask something not in the documents to confirm it says it doesn't know.
 
-## Using your own key
-Edit `.env` and set `GROQ_API_KEY`. Never commit a real key to a public repository.
+## Groq API key
+Open `.env` and set `GROQ_API_KEY` to your key (free at https://console.groq.com), then restart the server.
 
 ## Tech stack
 Python 3.10+, FastAPI, sentence-transformers (all-MiniLM-L6-v2), ChromaDB, rank-bm25, pypdf, Groq (`openai/gpt-oss-20b`).
